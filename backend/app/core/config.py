@@ -62,8 +62,12 @@ class Settings(BaseSettings):
     NEO4J_ENABLED: bool = True
 
     # Embedding
-    EMBEDDING_PROVIDER: str = "local"
-    EMBEDDING_MODEL: str = "BAAI/bge-m3"
+    EMBEDDING_PROVIDER: str = os.environ.get("EMBEDDING_PROVIDER") or _local_config.get(
+        "EMBEDDING_PROVIDER", "local"
+    )
+    EMBEDDING_MODEL: str = os.environ.get("EMBEDDING_MODEL") or _local_config.get(
+        "EMBEDDING_MODEL", "BAAI/bge-m3"
+    )
     EMBEDDING_MODEL_REVISION: str = "5617a9f61b028005a4858fdac845db406aefb181"
     EMBEDDING_MODEL_PATH: str | None = None
     EMBEDDING_LOCAL_FILES_ONLY: bool = False
@@ -72,7 +76,13 @@ class Settings(BaseSettings):
     EMBEDDING_API_KEY: str | None = None
     # Ollama embedding provider (EMBEDDING_PROVIDER=ollama). EMBEDDING_MODEL is
     # the Ollama model tag, e.g. "bge-m3" (1024 dims, matches EMBEDDING_DIMENSION).
-    EMBEDDING_OLLAMA_URL: str = "http://127.0.0.1:11434"
+    # NOTE: containers must use http://host.docker.internal:11434 (set in compose);
+    # host-side processes (tests, dev server) use http://127.0.0.1:11434 —
+    # override here or via config.local.py if the compose default leaks into
+    # a host process through .env.
+    EMBEDDING_OLLAMA_URL: str = os.environ.get("EMBEDDING_OLLAMA_URL") or _local_config.get(
+        "EMBEDDING_OLLAMA_URL", "http://127.0.0.1:11434"
+    )
     EMBEDDING_OLLAMA_TIMEOUT_S: float = 60.0
 
     # LLM Configuration - 从 config.local.py 或环境变量读取

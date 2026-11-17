@@ -3,11 +3,12 @@
 """
 from typing import Any, List, Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from app.security.middleware import get_principal
 
 from app.services.validator import RAGValidator, TestCase, quick_validate, compare_methods
 
-router = APIRouter(prefix="/validate", tags=["Validation"])
+router = APIRouter(prefix="/validate", tags=["Validation"], dependencies=[Depends(get_principal)])
 
 
 @router.post("/run")

@@ -3,12 +3,13 @@ Agentic RAG API - 智能问答接口
 """
 from typing import Any, Dict
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from app.security.middleware import get_principal
 from pydantic import BaseModel, Field
 
 from app.services.agentic_rag import agentic_rag_service
 
-router = APIRouter(prefix="/agentic", tags=["Agentic RAG"])
+router = APIRouter(prefix="/agentic", tags=["Agentic RAG"], dependencies=[Depends(get_principal)])
 
 
 class AskRequest(BaseModel):

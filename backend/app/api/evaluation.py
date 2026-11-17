@@ -4,7 +4,8 @@
 """
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from app.security.middleware import get_principal
 from pydantic import BaseModel, Field
 
 from app.services.evaluation import (
@@ -13,7 +14,7 @@ from app.services.evaluation import (
     TestCaseCategory
 )
 
-router = APIRouter(prefix="/evaluation", tags=["Evaluation"])
+router = APIRouter(prefix="/evaluation", tags=["Evaluation"], dependencies=[Depends(get_principal)])
 
 
 # ==================== 请求/响应模型 ====================

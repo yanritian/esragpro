@@ -3,7 +3,13 @@ from fastapi.testclient import TestClient
 from app.main import app
 
 
-def test_unscoped_routers_are_unavailable_anonymously() -> None:
+def test_scoped_routers_reject_anonymous_callers() -> None:
+    """G1 fail-closed: anonymous callers must never reach business routers.
+
+    The agentic / evaluation / graph / validate routers are now mounted but
+    principal-scoped: anonymous requests get 401 (unauthorized), preserving
+    the fail-closed invariant — no business data without credentials.
+    """
     client = TestClient(app)
 
     for path in (
@@ -14,7 +20,7 @@ def test_unscoped_routers_are_unavailable_anonymously() -> None:
     ):
         response = client.get(path)
 
-        assert response.status_code == 404
+        assert response.status_code == 401
 
 
 def test_health_route_remains_available() -> None:

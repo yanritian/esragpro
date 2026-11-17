@@ -5,12 +5,13 @@
 """
 from typing import Any, Dict, Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
+from app.security.middleware import get_principal
 from pydantic import BaseModel, Field
 
 from app.services.knowledge_graph import knowledge_graph_service
 
-router = APIRouter(prefix="/graph", tags=["Knowledge Graph (Admin)"])
+router = APIRouter(prefix="/graph", tags=["Knowledge Graph (Admin)"], dependencies=[Depends(get_principal)])
 
 
 # ==================== 请求/响应模型 ====================

@@ -1,3 +1,5 @@
+import asyncio
+import concurrent.futures
 import logging
 import math
 from pathlib import Path
@@ -7,6 +9,25 @@ import anyio
 import httpx
 
 from app.core.config import Settings, settings
+
+logger = logging.getLogger(__name__)
+
+
+def _run_blocking_coroutine(coro_fn, *args):
+    """Run an async embedding call from sync code.
+
+    Works both with and without a running event loop in the current thread:
+    - No loop: anyio.run executes it directly.
+    - Loop already running (async callers that use the sync facade): offload
+      to a worker thread with its own loop, otherwise anyio.run raises
+      "Already running asyncio in this thread".
+    """
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return anyio.run(coro_fn, *args)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+        return pool.submit(anyio.run, coro_fn, *args).result()
 
 logger = logging.getLogger(__name__)
 
@@ -195,12 +216,16 @@ class EmbeddingService:
 
     def _embed_ollama(self, texts: list[str]) -> list[list[float]]:
         """Ollama /api/embed 批量嵌入（本地网关，返回前做归一化）"""
-        return anyio.run(self._call_ollama_embedding, texts)
+        return _run_blocking_coroutine(self._call_ollama_embedding, texts)
 
     async def _call_ollama_embedding(self, texts: list[str]) -> list[list[float]]:
         """调用 Ollama Embedding API（EMBEDDING_MODEL 即 Ollama 模型标签，如 bge-m3）"""
         base = self._settings.EMBEDDING_OLLAMA_URL.rstrip("/")
-        async with httpx.AsyncClient(timeout=self._settings.EMBEDDING_OLLAMA_TIMEOUT_S) as client:
+        # Ollama 是本机回环网关：绝不经由环境代理转发（trust_env=False），
+        # 否则沙箱/企业代理会把 127.0.0.1 请求解析成"未知主机"
+        async with httpx.AsyncClient(
+            timeout=self._settings.EMBEDDING_OLLAMA_TIMEOUT_S, trust_env=False
+        ) as client:
             payload = {"model": self._settings.EMBEDDING_MODEL, "input": texts}
             response = await client.post(f"{base}/api/embed", json=payload)
             if response.status_code != 200:
@@ -240,7 +265,7 @@ class EmbeddingService:
             raise ValueError("请配置 EMBEDDING_API_KEY 或 LLM_API_KEY")
 
         # 通义 embedding API
-        return anyio.run(self._call_qwen_embedding, texts, api_key)
+        return _run_blocking_coroutine(self._call_qwen_embedding, texts, api_key)
 
     async def _call_qwen_embedding(self, texts: list[str], api_key: str) -> list[list[float]]:
         """调用通义 Embedding API"""
@@ -274,7 +299,7 @@ class EmbeddingService:
         if not api_key:
             raise ValueError("请配置 EMBEDDING_API_KEY 或 LLM_API_KEY")
 
-        return anyio.run(self._call_zhipu_embedding, texts, api_key)
+        return _run_blocking_coroutine(self._call_zhipu_embedding, texts, api_key)
 
     async def _call_zhipu_embedding(self, texts: list[str], api_key: str) -> list[list[float]]:
         """调用智谱 Embedding API"""

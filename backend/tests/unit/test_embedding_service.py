@@ -1,3 +1,5 @@
+import sys
+import types
 from pathlib import Path
 from typing import ClassVar
 
@@ -43,6 +45,10 @@ class _FakeSentenceTransformer:
 
 def _settings(model_path: str | None, *, offline: bool = False) -> Settings:
     return Settings(
+        # Hermetic unit tests: pin the provider so .env / environment
+        # variables (e.g. EMBEDDING_PROVIDER=ollama on a deployed machine)
+        # cannot redirect these tests onto the network path.
+        EMBEDDING_PROVIDER="local",
         EMBEDDING_MODEL_PATH=model_path,
         EMBEDDING_MODEL_REVISION="5617a9f61b028005a4858fdac845db406aefb181",
         EMBEDDING_OFFLINE=offline,
@@ -56,7 +62,14 @@ def _patch_model(monkeypatch: pytest.MonkeyPatch, config: Settings) -> None:
     _FakeSentenceTransformer.load_failure = None
     _FakeSentenceTransformer.encode_failure = None
     monkeypatch.setattr(embedding_module, "settings", config)
-    monkeypatch.setattr(embedding_module, "SentenceTransformer", _FakeSentenceTransformer)
+    # EmbeddingService now imports SentenceTransformer lazily inside
+    # load_model(), so the fake must be injected into sys.modules rather
+    # than patched as a module attribute.
+    monkeypatch.setitem(
+        sys.modules,
+        "sentence_transformers",
+        types.SimpleNamespace(SentenceTransformer=_FakeSentenceTransformer),
+    )
 
 
 def test_local_materialized_path_uses_pinned_offline_constructor_arguments(
