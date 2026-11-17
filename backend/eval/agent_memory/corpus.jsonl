@@ -1,0 +1,5 @@
+{"content": "What is the company password policy? The policy requires a minimum of 12 characters including uppercase, lowercase, digits, and special symbols.", "label": "password-policy"}
+{"content": "When was the last security audit? The audit was completed on 2026-06-15. The audit covered all critical systems and found no major issues.", "label": "security-audit"}
+{"content": "What decisions were made in the last architecture review? Approved the new caching layer, decided to migrate the database, and reviewed the deployment strategy.", "label": "architecture-decisions"}
+{"content": "What is the project deadline? The deadline for the current milestone is 2026-09-30. The team is on track for this deadline.", "label": "project-deadline"}
+{"content": "What were the team meeting notes? The weekly sync discussed sprint progress, reviewed blockers, and noted action items for each team member.", "label": "team-meeting-notes"}

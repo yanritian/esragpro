@@ -1,0 +1,8 @@
+{"category": "fact", "expected_memory_ids": ["password-policy"], "expected_refusal": false, "id": "item-001", "query": "What is the company password policy?"}
+{"category": "fact", "expected_memory_ids": [], "expected_refusal": true, "id": "item-002", "query": "What is the CEO's home address?"}
+{"category": "temporal", "expected_memory_ids": ["security-audit"], "expected_refusal": false, "id": "item-003", "query": "When was the last security audit?"}
+{"category": "conflict", "expected_memory_ids": [], "expected_refusal": true, "id": "item-004", "query": "What are the unicorn product revenue figures?"}
+{"category": "multi_hop", "expected_memory_ids": ["architecture-decisions"], "expected_refusal": false, "id": "item-005", "query": "What decisions were made in the last architecture review?"}
+{"category": "fact", "expected_memory_ids": ["project-deadline"], "expected_refusal": false, "id": "item-006", "query": "What is the project deadline?"}
+{"category": "fact", "expected_memory_ids": [], "expected_refusal": true, "id": "item-007", "query": "What is the secret merger target?"}
+{"category": "temporal", "expected_memory_ids": ["team-meeting-notes"], "expected_refusal": false, "id": "item-008", "query": "What were the team meeting notes?"}

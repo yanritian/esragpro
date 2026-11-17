@@ -1,0 +1,56 @@
+{
+  "repository_type": "multi-part",
+  "project_name": "esRAGPro",
+  "scan_date": "2026-07-22",
+  "parts": [
+    {
+      "part_id": "backend",
+      "project_type": "backend",
+      "root": "../backend",
+      "technology": "Python 3.10+, FastAPI, SQLAlchemy, Alembic",
+      "architecture_doc": "./architecture-backend.md",
+      "development_doc": "./development-guide-backend.md",
+      "api_doc": "./api-contracts-backend.md",
+      "data_doc": "./data-models-backend.md"
+    },
+    {
+      "part_id": "frontend",
+      "project_type": "web",
+      "root": "../frontend",
+      "technology": "Vue 3, Vite, Pinia, Element Plus, vis-network",
+      "architecture_doc": "./architecture-frontend.md",
+      "development_doc": "./development-guide-frontend.md",
+      "component_doc": "./component-inventory-frontend.md"
+    },
+    {
+      "part_id": "mcp_gateway",
+      "project_type": "cli",
+      "root": "../esragpro-mcp",
+      "technology": "Rust 2021, rmcp, Axum, Tokio, Reqwest",
+      "architecture_doc": "./architecture-mcp_gateway.md",
+      "development_doc": "./development-guide-mcp_gateway.md",
+      "component_doc": "./component-inventory-mcp_gateway.md"
+    }
+  ],
+  "auxiliary_parts": [
+    {
+      "part_id": "agent_org",
+      "root": "../.agent-team",
+      "role": "Codex-owned development scheduler, adapter registry, event log, replay and smoke tooling"
+    },
+    {
+      "part_id": "infra",
+      "root": "../docker-compose.yml",
+      "role": "Local service orchestration for Elasticsearch, PostgreSQL, Redis, Neo4j, Backend and Frontend"
+    }
+  ],
+  "integration_points": [
+    { "from": "frontend", "to": "backend", "protocol": "HTTP/JSON", "contract": "FastAPI /api/v1 routes" },
+    { "from": "agent_clients", "to": "mcp_gateway", "protocol": "MCP stdio or Streamable HTTP", "contract": "Rust schema and tool envelopes" },
+    { "from": "mcp_gateway", "to": "backend", "protocol": "planned HTTP client", "contract": "memory-plane and enterprise domain APIs" },
+    { "from": "backend", "to": "elasticsearch", "protocol": "Elasticsearch client", "contract": "BM25, kNN and RRF projection" },
+    { "from": "backend", "to": "postgresql", "protocol": "SQLAlchemy/asyncpg", "contract": "identity, documents, claims, sessions, tasks and future memory source of truth" },
+    { "from": "backend", "to": "neo4j", "protocol": "Neo4j driver", "contract": "entities, relations, subgraphs and future temporal memory graph" },
+    { "from": "codex_agent_org", "to": "claude_code_qwen", "protocol": "local process adapter and JSONL events", "contract": "development task lifecycle, not product runtime" }
+  ]
+}

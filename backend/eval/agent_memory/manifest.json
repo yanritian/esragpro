@@ -1,0 +1,11 @@
+{
+  "corpus_filename": "corpus.jsonl",
+  "corpus_hash": "83a67ae686528eec59add35966a29c88d1a6477e91ea52865a966bd59001069a",
+  "created_at": "2026-07-30T00:00:00+00:00",
+  "description": "P5 sealed holdout fixture for deterministic evaluation. No permission-centric categories.",
+  "items_count": 8,
+  "items_filename": "items.jsonl",
+  "items_hash": "8b6360e06e26052b0d5a56cdfaf1078c783d4f6801d787d5e8e0fb9c3b9c8b13",
+  "name": "agent_memory_eval",
+  "version": "1.0.0"
+}

@@ -1,0 +1,12 @@
+# MCP Gateway Configuration
+backend_url = "http://localhost:8000/api/v1"
+auth_token = ""  # Optional: JWT token for backend auth
+
+# Transport: "http" mode serves all agents (Claude Code / Codex / Pi /
+# WorkBuddy / Orca) from one instance on 127.0.0.1:8421/mcp.
+transport = "http"
+http_enabled = true
+http_addr = "127.0.0.1:8421"
+
+# Logging
+log_level = "info"

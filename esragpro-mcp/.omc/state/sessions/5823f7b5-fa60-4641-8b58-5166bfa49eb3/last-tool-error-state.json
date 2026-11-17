@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"powershell.exe -NoProfile -Command \\\"Set-Location 'D:\\\\dingsun\\\\esRAGPro\\\\esragpro-mcp'; \\\\$env:CARGO_TARGET_DIR = 'C:\\\\Temp\\\\esragpro-mcp-target'; cargo check --locked --all-targets 2>&1\\...",
+  "error": "Exit code 1\ncargo :     Checking esragpro-mcp v0.1.0 (D:\\dingsun\\esRAGPro\\esragpro-mcp)\r\n����λ�� ��:1 �ַ�: 105\r\n+ ... C:\\Temp\\esragpro-mcp-target'; cargo check --locked --all-targets 2>&1\r\n+                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : NotSpecified: (    Checking es...o\\esragpro-mcp):String) [], RemoteException\r\n    + FullyQualifiedErrorId : NativeCommandError\r\n \r\nwarning: unused imports: `AgentContextBundle`, `EvidencePacket`, `Evidenc...",
+  "timestamp": "2026-07-22T12:28:17.020Z",
+  "retry_count": 1
+}

@@ -1,0 +1,236 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://esragpro.example.com/schemas/domain-api-v1.schema.json",
+  "title": "esRAGPro Domain API V1",
+  "description": "Domain API contract for upload sessions, management requests, and outbox execution",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["upload_session", "management_request", "outbox_event"],
+
+  "properties": {
+    "upload_session": {
+      "type": "object",
+      "description": "Upload session for secure file ingestion",
+      "additionalProperties": false,
+      "required": ["upload_session_id", "knowledge_base_id", "filename", "media_type", "size_bytes", "state", "created_at", "created_by"],
+
+      "properties": {
+        "upload_session_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique upload session identifier (UUIDv7)"
+        },
+        "knowledge_base_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Target knowledge base"
+        },
+        "filename": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "Original filename"
+        },
+        "media_type": {
+          "type": "string",
+          "pattern": "^[a-z]+/[a-z0-9.+-]+$",
+          "description": "MIME type"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1073741824,
+          "description": "File size in bytes (max 1GB)"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "SHA-256 hash of uploaded content"
+        },
+        "state": {
+          "type": "string",
+          "enum": ["created", "uploaded", "finalized", "consumed", "expired", "aborted"],
+          "description": "Upload session state"
+        },
+        "source_ref": {
+          "type": "string",
+          "description": "Opaque reference to finalized upload (only present when state=finalized)"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Session expiration time"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp"
+        },
+        "created_by": {
+          "type": "string",
+          "description": "Creator subject ID"
+        }
+      }
+    },
+
+    "management_request": {
+      "type": "object",
+      "description": "Management request for rebuild or deletion operations",
+      "additionalProperties": false,
+      "required": ["job_id", "job_kind", "knowledge_base_id", "state", "revision", "created_at", "created_by"],
+
+      "properties": {
+        "job_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Job identifier (UUIDv7)"
+        },
+        "job_kind": {
+          "type": "string",
+          "enum": ["ingest", "projection_rebuild", "document_deletion"],
+          "description": "Job type"
+        },
+        "knowledge_base_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Target knowledge base"
+        },
+        "document_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Target document (only for document_deletion)"
+        },
+        "projections": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["search", "graph"]
+          },
+          "description": "Projections to rebuild (only for projection_rebuild)"
+        },
+        "state": {
+          "type": "string",
+          "enum": ["approval_pending", "approved", "rejected", "execution_queued", "executing", "succeeded", "failed"],
+          "description": "Request state"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Optimistic concurrency revision"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000,
+          "description": "Request reason"
+        },
+        "decision": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "decision": {
+              "type": "string",
+              "enum": ["approve", "reject"]
+            },
+            "decided_by": {
+              "type": "string",
+              "description": "Approver subject ID"
+            },
+            "decided_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "reason": {
+              "type": "string"
+            }
+          }
+        },
+        "execution": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "state": {
+              "type": "string",
+              "enum": ["queued", "executing", "succeeded", "failed"]
+            },
+            "attempt": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "started_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "finished_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "last_error_code": {
+              "type": "string"
+            }
+          }
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "created_by": {
+          "type": "string",
+          "description": "Requester subject ID"
+        }
+      }
+    },
+
+    "outbox_event": {
+      "type": "object",
+      "description": "Transactional outbox event for projection synchronization",
+      "additionalProperties": false,
+      "required": ["event_id", "aggregate_type", "aggregate_id", "event_type", "payload"],
+
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Event identifier (UUIDv7)"
+        },
+        "aggregate_type": {
+          "type": "string",
+          "enum": ["document", "claim", "acl", "management_request"],
+          "description": "Source aggregate type"
+        },
+        "aggregate_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Aggregate identifier"
+        },
+        "aggregate_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Aggregate revision"
+        },
+        "event_type": {
+          "type": "string",
+          "description": "Event type (e.g., document.version.accepted.v1)"
+        },
+        "payload_schema_version": {
+          "type": "string",
+          "const": "1",
+          "description": "Payload schema version"
+        },
+        "payload": {
+          "type": "object",
+          "description": "Event payload (schema depends on event_type)"
+        },
+        "occurred_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Event occurrence timestamp"
+        },
+        "processed_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Processing timestamp (null if not processed)"
+        }
+      }
+    }
+  }
+}

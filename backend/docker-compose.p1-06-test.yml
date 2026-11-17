@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: "no"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: esragpro_p1_06_test
+    ports:
+      - target: 5432
+        published: "${P1_06_POSTGRES_PORT}"
+        host_ip: 127.0.0.1
+        protocol: tcp
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d esragpro_p1_06_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 2s
+    volumes:
+      - p1_06_test_data:/var/lib/postgresql/data
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    restart: "no"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - target: 9200
+        published: "${P1_06_ELASTICSEARCH_PORT}"
+        host_ip: 127.0.0.1
+        protocol: tcp
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+    volumes:
+      - p1_06_test_es_data:/usr/share/elasticsearch/data
+
+volumes:
+  p1_06_test_data:
+  p1_06_test_es_data:

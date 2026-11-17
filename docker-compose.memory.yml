@@ -1,0 +1,170 @@
+# docker-compose.memory.yml
+# ============================================================
+# Backend-only memory compose profile.
+#
+# Scope (per .agent-team/control-plane/plans/run-20260730-p4-memory-compose-boundary.md):
+#   - Elasticsearch   (with healthcheck)
+#   - PostgreSQL      (with healthcheck, authoritative store)
+#   - Redis           (with healthcheck)
+#   - FastAPI backend (exposed for TUI/MCP clients)
+#
+# Explicitly NOT in this profile:
+#   - frontend   (optional; remains in docker-compose.yml)
+#   - minio      (outside the memory profile — see runbook)
+#   - neo4j      (outside the memory profile; NEO4J_ENABLED=false)
+#
+# All host ports are overridable via environment variables so
+# this stack can run alongside an already-live local stack.
+# All internal traffic uses service DNS names on an isolated
+# network; all state lives on isolated named volumes.
+# ============================================================
+
+name: esragpro-memory
+
+services:
+
+  # ----------------------------------------------------------
+  # Elasticsearch 8.12 — hybrid-search backbone
+  # ----------------------------------------------------------
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: esragpro-mem-es
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - target: 9200
+        published: "${MEM_ES_PORT:-19200}"
+        host_ip: 127.0.0.1
+        protocol: tcp
+    volumes:
+      - mem_es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - mem-internal
+
+  # ----------------------------------------------------------
+  # PostgreSQL 15 — authoritative memory store
+  # ----------------------------------------------------------
+  postgres:
+    image: postgres:15
+    container_name: esragpro-mem-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-change-me-strong-password}
+      POSTGRES_DB: esragpro
+    ports:
+      - target: 5432
+        published: "${MEM_PG_PORT:-15432}"
+        host_ip: 127.0.0.1
+        protocol: tcp
+    volumes:
+      - mem_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d esragpro"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 10s
+    networks:
+      - mem-internal
+
+  # ----------------------------------------------------------
+  # Redis 7 — hot state / cache
+  # ----------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: esragpro-mem-redis
+    restart: unless-stopped
+    ports:
+      - target: 6379
+        published: "${MEM_REDIS_PORT:-16379}"
+        host_ip: 127.0.0.1
+        protocol: tcp
+    volumes:
+      - mem_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    networks:
+      - mem-internal
+
+  # ----------------------------------------------------------
+  # FastAPI backend — exposed for TUI / MCP clients
+  #
+  # * Uses service DNS names (elasticsearch, postgres, redis)
+  #   for all intra-stack connections.
+  # * MEMORY_CANDIDATE_SOURCES_ENABLED=true is set ONLY here —
+  #   the global default in .env.example stays false.
+  # * NEO4J_ENABLED=false keeps the Neo4j code path inert; no
+  #   Neo4j service is declared in this profile.
+  # * Port 8000 is published on MEM_BACKEND_PORT so external
+  #   TUI and MCP clients can reach the API.
+  # ----------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: esragpro-mem-backend
+    restart: unless-stopped
+    ports:
+      - target: 8000
+        published: "${MEM_BACKEND_PORT:-18000}"
+        host_ip: 127.0.0.1
+        protocol: tcp
+    environment:
+      # --- intra-stack DNS (service names on mem-internal) ---
+      ES_HOST: http://elasticsearch:9200
+      DATABASE_URL: postgresql+asyncpg://${DB_USER:-postgres}:${DB_PASSWORD:-change-me-strong-password}@postgres:5432/esragpro
+      REDIS_URL: redis://redis:6379/0
+      # --- Neo4j explicitly disabled in this profile --------
+      NEO4J_ENABLED: "false"
+      # --- memory candidate sources enabled ONLY here -------
+      MEMORY_CANDIDATE_SOURCES_ENABLED: "true"
+      MEMORY_CANDIDATE_SOURCE_TIMEOUT_S: "${MEMORY_CANDIDATE_SOURCE_TIMEOUT_S:-2.0}"
+      # --- LLM / JWT (forwarded from host env / .env) -------
+      LLM_PROVIDER: ${LLM_PROVIDER:-deepseek}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-deepseek-chat}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-me-jwt-secret-replace-with-openssl-rand-hex-32}
+      # --- misc ---------------------------------------------
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DEBUG: ${DEBUG:-false}
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - mem_uploads:/app/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/v1/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - mem-internal
+
+volumes:
+  mem_es_data:
+  mem_pg_data:
+  mem_redis_data:
+  mem_uploads:
+
+networks:
+  mem-internal:
+    driver: bridge

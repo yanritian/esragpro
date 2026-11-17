@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "environment-manifest-2026-07-10.json",
+  "title": "esRAGPro Environment Manifest",
+  "description": "WP0 baseline environment configuration",
+  "timestamp": "2026-07-10T22:52:00+08:00",
+  "run_id": "019f4c82-b107-0000-0000-b0359f573d6a",
+
+  "repositories": {
+    "esragpro-core": {
+      "path": "D:\\dingsun\\esRAGPro",
+      "git_status": "initialized",
+      "commit": "0ac973c4ea86c2c469561b18365dbf17e16daf11",
+      "branch": "main",
+      "gitignore_exists": true
+    },
+    "esragpro-mcp": {
+      "path": "D:\\dingsun\\esRAGPro\\esragpro-mcp",
+      "git_status": "initialized",
+      "commit": "0ac973c4ea86c2c469561b18365dbf17e16daf11",
+      "branch": "main",
+      "gitignore_exists": false
+    }
+  },
+
+  "toolchain": {
+    "python": {
+      "version": "3.13.5",
+      "executable": "D:\\Python313\\python.exe",
+      "status": "available"
+    },
+    "node": {
+      "version": "22.18.0",
+      "npm_version": "11.5.2",
+      "status": "available"
+    },
+    "docker": {
+      "version": "29.3.1",
+      "compose_version": "5.1.1",
+      "status": "available"
+    },
+    "rust": {
+      "rustc_version": "1.96.0",
+      "cargo_version": "1.96.0",
+      "status": "available"
+    }
+  },
+
+  "platform": {
+    "os": "Windows 10 Pro",
+    "os_version": "10.0.19045",
+    "cpu_arch": "x86_64"
+  },
+
+  "dependencies": {
+    "backend": {
+      "pyproject_toml_exists": true,
+      "uv_lock_exists": false,
+      "venv_exists": false,
+      "pytest_available": false
+    },
+    "frontend": {
+      "package_json_exists": true,
+      "package_lock_json_exists": true,
+      "node_modules_exists": false
+    },
+    "mcp": {
+      "cargo_toml_exists": true,
+      "cargo_lock_exists": false,
+      "cargo_check_passed": false,
+      "failure_reason": "ort dependency version conflict"
+    }
+  },
+
+  "docker_compose": {
+    "docker_compose_yml": {
+      "exists": true,
+      "valid": true,
+      "warnings": ["version attribute is obsolete"]
+    },
+    "docker_compose_secure_yml": {
+      "exists": true,
+      "valid": true,
+      "warnings": [
+        "version attribute is obsolete",
+        "LLLM_MODEL variable not set"
+      ]
+    }
+  },
+
+  "known_issues": [
+    {
+      "id": "ISSUE-001",
+      "component": "backend",
+      "description": "pytest not installed",
+      "severity": "high",
+      "fix_wp": "WP1"
+    },
+    {
+      "id": "ISSUE-002",
+      "component": "mcp",
+      "description": "Cargo check fails due to ort dependency",
+      "severity": "high",
+      "fix_wp": "WP0"
+    },
+    {
+      "id": "ISSUE-003",
+      "component": "backend/app/api/kb.py",
+      "description": "Calls non-existent index_document_with_graph",
+      "severity": "critical",
+      "fix_wp": "WP1"
+    },
+    {
+      "id": "ISSUE-004",
+      "component": "backend/app/services/graph_rag.py",
+      "description": "Passes query_vector=None to kNN",
+      "severity": "critical",
+      "fix_wp": "WP1"
+    },
+    {
+      "id": "ISSUE-005",
+      "component": "backend/app/api/auth.py",
+      "description": "Allows client-submitted role in registration",
+      "severity": "critical",
+      "fix_wp": "WP1"
+    }
+  ],
+
+  "wp0_requirements": {
+    "adr_files": {
+      "required": 6,
+      "existing": 0,
+      "missing": 6
+    },
+    "audit_files": {
+      "required": 2,
+      "existing": 1,
+      "missing": 1
+    },
+    "schema_files": {
+      "required": 3,
+      "existing": 0,
+      "missing": 3
+    },
+    "sdk_spikes": {
+      "required": 2,
+      "existing": 0,
+      "missing": 2
+    },
+    "lock_files": {
+      "required": 2,
+      "existing": 1,
+      "missing": 1
+    }
+  },
+
+  "next_steps": [
+    "Create 6 ADR documents",
+    "Create 3 JSON Schema files",
+    "Create SDK spike for stdio and HTTP",
+    "Generate backend/uv.lock",
+    "Create .gitignore for esragpro-mcp",
+    "Run verify_wp0.ps1 to validate"
+  ]
+}

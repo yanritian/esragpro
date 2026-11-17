@@ -1,0 +1,437 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://esragpro.example.com/schemas/mcp-v1.schema.json",
+  "title": "esRAGPro MCP V1 Contract",
+  "description": "Complete MCP V1 capability contract for reader, operator, and admin profiles",
+  "type": "object",
+  "additionalProperties": false,
+
+  "definitions": {
+    "ToolInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["knowledge_base_ids"],
+      "properties": {
+        "knowledge_base_ids": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": "Target knowledge base IDs (array for kb.* tools)"
+        },
+        "knowledge_base_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Target knowledge base ID (single for graph.* tools)"
+        },
+        "query": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000,
+          "description": "Search query"
+        },
+        "question": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000,
+          "description": "Question for answer generation"
+        },
+        "top_k": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50,
+          "default": 10,
+          "description": "Maximum results to return"
+        },
+        "cursor": {
+          "type": "string",
+          "description": "Pagination cursor (opaque)"
+        },
+        "valid_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Valid-at timestamp for temporal queries"
+        },
+        "graph_policy": {
+          "type": "string",
+          "enum": ["auto", "never", "required"],
+          "default": "auto",
+          "description": "Graph retrieval policy"
+        },
+        "budget_class": {
+          "type": "string",
+          "enum": ["interactive", "analysis"],
+          "default": "interactive",
+          "description": "Budget class for query execution"
+        },
+        "filters": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "document_ids": {
+              "type": "array",
+              "items": {"type": "string", "format": "uuid"}
+            },
+            "tags": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "source_types": {
+              "type": "array",
+              "items": {"type": "string", "enum": ["pdf", "docx", "txt", "md"]}
+            }
+          }
+        },
+        "entity_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Entity identifier"
+        },
+        "name_or_identifier": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500,
+          "description": "Entity name or identifier to lookup"
+        },
+        "direction": {
+          "type": "string",
+          "enum": ["in", "out", "both"],
+          "description": "Graph traversal direction"
+        },
+        "max_depth": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2,
+          "default": 1,
+          "description": "Maximum traversal depth"
+        },
+        "max_hops": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4,
+          "default": 2,
+          "description": "Maximum path hops"
+        },
+        "from_entity_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "to_entity_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "claim": {
+          "type": "object",
+          "required": ["subject", "predicate", "object"],
+          "properties": {
+            "subject": {"type": "string"},
+            "predicate": {"type": "string"},
+            "object": {"type": "string"},
+            "qualifiers": {
+              "type": "array",
+              "items": {"type": "object"}
+            },
+            "polarity": {
+              "type": "string",
+              "enum": ["positive", "negative"]
+            }
+          }
+        },
+        "source_ref": {
+          "type": "string",
+          "description": "Opaque source reference from upload session"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "Idempotency key (SHA-256)"
+        },
+        "document_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "expected_revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "job_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "projections": {
+          "type": "array",
+          "items": {"type": "string", "enum": ["search", "graph"]}
+        }
+      }
+    },
+
+    "ToolOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "request_id"],
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "1.0"
+        },
+        "request_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["ok", "partial", "no_match", "refused"]
+        },
+        "data": {
+          "type": "object"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "job_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "job_kind": {
+          "type": "string",
+          "enum": ["ingest", "projection_rebuild", "document_deletion"]
+        },
+        "state": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "resource_uri": {
+          "type": "string",
+          "pattern": "^esrag://kb/[a-f0-9-]+/jobs/[a-f0-9-]+$"
+        },
+        "idempotency_replayed": {
+          "type": "boolean"
+        },
+        "accepted_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  },
+
+  "properties": {
+    "tools": {
+      "type": "object",
+      "description": "MCP Tools definition",
+      "additionalProperties": false,
+
+      "properties": {
+        "reader": {
+          "type": "array",
+          "description": "Reader profile tools (6 tools)",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {
+            "type": "object",
+            "required": ["name", "inputSchema", "outputSchema"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "enum": [
+                  "kb.search_evidence",
+                  "kb.answer_with_evidence",
+                  "graph.lookup_entity",
+                  "graph.expand",
+                  "graph.find_paths",
+                  "graph.verify_claim"
+                ]
+              },
+              "inputSchema": {"$ref": "#/definitions/ToolInput"},
+              "outputSchema": {"$ref": "#/definitions/ToolOutput"}
+            }
+          }
+        },
+
+        "operator": {
+          "type": "array",
+          "description": "Operator profile tools (reader + 3 management = 9 tools)",
+          "minItems": 9,
+          "maxItems": 9,
+          "items": {
+            "type": "object",
+            "required": ["name", "inputSchema", "outputSchema"],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "inputSchema": {"$ref": "#/definitions/ToolInput"},
+              "outputSchema": {"$ref": "#/definitions/ToolOutput"}
+            }
+          }
+        },
+
+        "admin": {
+          "type": "array",
+          "description": "Admin profile tools (operator + 1 = 10 tools)",
+          "minItems": 10,
+          "maxItems": 10,
+          "items": {
+            "type": "object",
+            "required": ["name", "inputSchema", "outputSchema"],
+            "properties": {
+              "name": {"type": "string"},
+              "inputSchema": {"$ref": "#/definitions/ToolInput"},
+              "outputSchema": {"$ref": "#/definitions/ToolOutput"}
+            }
+          }
+        }
+      }
+    },
+
+    "resources": {
+      "type": "object",
+      "description": "MCP Resources definition",
+      "additionalProperties": false,
+
+      "properties": {
+        "static": {
+          "type": "array",
+          "description": "Static resources (1)",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "uri": {
+                "type": "string",
+                "const": "esrag://server/capabilities"
+              }
+            }
+          }
+        },
+
+        "templates": {
+          "type": "array",
+          "description": "Resource templates (8)",
+          "minItems": 8,
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "properties": {
+              "uriTemplate": {
+                "type": "string",
+                "enum": [
+                  "esrag://kb/{kb_id}/documents/{doc_id}/versions/{version_id}",
+                  "esrag://kb/{kb_id}/evidence/{evidence_id}",
+                  "esrag://kb/{kb_id}/entities/{entity_id}",
+                  "esrag://kb/{kb_id}/claims/{claim_id}",
+                  "esrag://kb/{kb_id}/ontology/{schema_version}",
+                  "esrag://kb/{kb_id}/jobs/{job_id}",
+                  "esrag://kb/{kb_id}/catalog",
+                  "esrag://kb/{kb_id}/stats"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "prompts": {
+      "type": "array",
+      "description": "MCP Prompts (4)",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": [
+              "answer-with-citations",
+              "compare-evidence",
+              "trace-requirement",
+              "verify-claim"
+            ]
+          }
+        }
+      }
+    },
+
+    "scopes": {
+      "type": "array",
+      "description": "OAuth scopes",
+      "items": {
+        "type": "string",
+        "enum": [
+          "knowledge:read",
+          "knowledge:answer",
+          "graph:read",
+          "graph:verify",
+          "ingest:create",
+          "ingest:cancel",
+          "projection:rebuild",
+          "document:delete:request"
+        ]
+      }
+    },
+
+    "profiles": {
+      "type": "object",
+      "description": "Profile definitions",
+      "additionalProperties": false,
+
+      "properties": {
+        "reader": {
+          "type": "object",
+          "properties": {
+            "tools": {"type": "integer", "const": 6},
+            "scopes": {
+              "type": "array",
+              "items": {"type": "string"},
+              "enum": ["knowledge:read", "knowledge:answer", "graph:read", "graph:verify"]
+            }
+          }
+        },
+
+        "operator": {
+          "type": "object",
+          "properties": {
+            "tools": {"type": "integer", "const": 9},
+            "scopes": {
+              "type": "array",
+              "description": "Reader scopes + management scopes"
+            }
+          }
+        },
+
+        "admin": {
+          "type": "object",
+          "properties": {
+            "tools": {"type": "integer", "const": 10},
+            "scopes": {
+              "type": "array",
+              "description": "Operator scopes + delete:request scope"
+            }
+          }
+        }
+      }
+    }
+  }
+}

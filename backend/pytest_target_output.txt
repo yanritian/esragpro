@@ -1,0 +1,12 @@
+......                                                                   [100%]
+============================== warnings summary ===============================
+tests/unit/test_world_memory_neo4j_writer.py::test_encode_command_is_deterministic_and_complete
+  D:\dingsun\esRAGPro\backend\app\core\config.py:28: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class Settings(BaseSettings):
+
+C:\Users\11239\AppData\Roaming\Python\Python314\site-packages\_pytest\cacheprovider.py:469
+  C:\Users\11239\AppData\Roaming\Python\Python314\site-packages\_pytest\cacheprovider.py:469: PytestCacheWarning: could not create cache path D:\dingsun\esRAGPro\backend\.pytest_cache\v\cache\nodeids: [WinError 183] 当文件已存在时，无法创建该文件。: 'D:\\dingsun\\esRAGPro\\backend\\.pytest_cache\\v\\cache'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+6 passed, 2 warnings in 30.64s

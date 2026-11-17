@@ -1,0 +1,218 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://esragpro.example.com/schemas/principal-context-v1.schema.json",
+  "title": "esRAGPro Principal Context V1",
+  "description": "Principal context for identity and authorization in enterprise knowledge system",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "context_version",
+    "request_id",
+    "trace_id",
+    "tenant_id",
+    "subject_id",
+    "subject_type",
+    "client_id",
+    "authn",
+    "authorization"
+  ],
+
+  "properties": {
+    "context_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Schema version"
+    },
+
+    "request_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique request identifier (UUIDv7)"
+    },
+
+    "trace_id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{32}$",
+      "description": "W3C trace ID for distributed tracing"
+    },
+
+    "tenant_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Tenant identifier"
+    },
+
+    "subject_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "description": "Stable subject identifier (user or service)"
+    },
+
+    "subject_type": {
+      "type": "string",
+      "enum": ["user", "service"],
+      "description": "Subject type"
+    },
+
+    "client_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "description": "OAuth client identifier"
+    },
+
+    "authn": {
+      "type": "object",
+      "description": "Authentication context",
+      "additionalProperties": false,
+      "required": ["issuer", "audience", "method", "auth_time"],
+
+      "properties": {
+        "issuer": {
+          "type": "string",
+          "format": "uri",
+          "description": "Token issuer (IdP URL)"
+        },
+
+        "audience": {
+          "type": "string",
+          "format": "uri",
+          "description": "Token audience (resource server URL)"
+        },
+
+        "method": {
+          "type": "string",
+          "enum": ["oauth", "workload", "local-stdio"],
+          "description": "Authentication method"
+        },
+
+        "auth_time": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Authentication timestamp"
+        }
+      }
+    },
+
+    "authorization": {
+      "type": "object",
+      "description": "Authorization context",
+      "additionalProperties": false,
+      "required": [
+        "scopes",
+        "roles",
+        "group_ids",
+        "knowledge_base_ids",
+        "clearance",
+        "policy_version",
+        "authorization_revision",
+        "authorization_fingerprint",
+        "access_partition_ids"
+      ],
+
+      "properties": {
+        "scopes": {
+          "type": "array",
+          "description": "Granted OAuth scopes",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "knowledge:read",
+              "knowledge:answer",
+              "graph:read",
+              "graph:verify",
+              "ingest:create",
+              "ingest:cancel",
+              "projection:rebuild",
+              "document:delete:request"
+            ]
+          }
+        },
+
+        "roles": {
+          "type": "array",
+          "description": "Assigned roles",
+          "items": {
+            "type": "string",
+            "enum": ["tenant_admin", "kb_admin", "editor", "reader", "auditor"]
+          }
+        },
+
+        "group_ids": {
+          "type": "array",
+          "description": "Group memberships",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+
+        "knowledge_base_ids": {
+          "type": "array",
+          "description": "Authorized knowledge bases",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+
+        "clearance": {
+          "type": "string",
+          "enum": ["public", "internal", "confidential", "restricted"],
+          "description": "Security clearance level"
+        },
+
+        "policy_version": {
+          "type": "string",
+          "pattern": "^v[0-9]+$",
+          "description": "Authorization policy version"
+        },
+
+        "authorization_revision": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Authorization revision number"
+        },
+
+        "authorization_fingerprint": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "SHA-256 hash of effective grants"
+        },
+
+        "access_partition_ids": {
+          "type": "array",
+          "description": "Access partition identifiers",
+          "items": {
+            "type": "string",
+            "pattern": "^(u:|g:|r:)[a-zA-Z0-9_-]+$"
+          }
+        }
+      }
+    },
+
+    "delegation": {
+      "type": "object",
+      "description": "Delegation context (optional)",
+      "additionalProperties": false,
+      "required": ["on_behalf_of", "chain"],
+
+      "properties": {
+        "on_behalf_of": {
+          "type": "string",
+          "description": "Original subject ID"
+        },
+
+        "chain": {
+          "type": "array",
+          "description": "Delegation chain",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

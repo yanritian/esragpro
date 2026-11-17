@@ -1,0 +1,6 @@
+{"category": "evidence", "expected_labels": ["obs-temperature", "obs-pressure", "obs-audit"], "expected_refusal": false, "id": "wm-001", "kind": "observation", "require_evidence": true}
+{"category": "refusal", "expected_labels": [], "expected_refusal": true, "id": "wm-002", "kind": "hypothesis", "require_evidence": true}
+{"category": "mixed", "expected_labels": ["obs-temperature", "obs-pressure", "obs-no-evidence", "state-normal", "fact-temp-safe", "obs-audit", "hyp-no-evidence"], "expected_refusal": false, "id": "wm-003", "kind": null, "require_evidence": false}
+{"category": "evidence", "expected_labels": ["fact-temp-safe"], "expected_refusal": false, "id": "wm-004", "kind": "fact", "require_evidence": true}
+{"category": "freshness", "expected_labels": ["obs-temperature", "obs-pressure", "obs-no-evidence", "obs-audit"], "expected_refusal": false, "id": "wm-005", "kind": "observation", "require_evidence": false}
+{"category": "refusal", "expected_labels": [], "expected_refusal": true, "id": "wm-006", "kind": "hypothesis", "require_evidence": true}

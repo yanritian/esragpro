@@ -1,0 +1,38 @@
+# Rust
+target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build outputs
+dist/
+out/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# MCP specific
+# Note: Cargo.lock should be included for binary projects
+# but we'll generate it during SDK spike

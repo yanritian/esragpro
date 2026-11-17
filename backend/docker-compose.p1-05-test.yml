@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:15
+    restart: "no"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: esragpro_p1_05_test
+    ports:
+      - target: 5432
+        published: "${P1_05_POSTGRES_PORT}"
+        host_ip: 127.0.0.1
+        protocol: tcp
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d esragpro_p1_05_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 2s
+    volumes:
+      - p1_05_test_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    restart: "no"
+    ports:
+      - target: 6379
+        published: "${P1_05_REDIS_PORT}"
+        host_ip: 127.0.0.1
+        protocol: tcp
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 2s
+
+  redis_auth:
+    image: redis:7-alpine
+    restart: "no"
+    command: ["redis-server", "--requirepass", "p105testpass"]
+    ports:
+      - target: 6379
+        published: "${P1_05_AUTH_REDIS_PORT}"
+        host_ip: 127.0.0.1
+        protocol: tcp
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "p105testpass", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 2s
+
+volumes:
+  p1_05_test_data:

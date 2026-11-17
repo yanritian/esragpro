@@ -1,0 +1,131 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.pyo
+.pyd
+*.egg-info/
+dist/
+build/
+*.egg
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+.env.*.local
+.venv/
+venv/
+ENV/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build outputs
+.next/
+.nuxt/
+out/
+target/
+
+# Cache
+.cache/
+.pytest_cache/
+.mypy_cache/
+
+# Test coverage
+coverage/
+.coverage
+htmlcov/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Project specific
+uploads/
+*.pdf
+*.docx
+*.doc
+!docs/
+
+# Embedding model cache
+/models/
+.cache/huggingface/
+
+# Docker volumes (local)
+es_data/
+postgres_data/
+redis_data/
+
+# Secrets
+config.local.py
+backend/config.local.py
+
+# BMad files (optional - uncomment if you don't want to track)
+# .bmad-core/
+# .claude/commands/BMad/
+# _bmad/
+# _bmad-output/config.local.py
+
+# ============================================================
+# Local AI-tool artifacts & private workspace state (never publish)
+# ============================================================
+.agent-team/
+.claude/
+.agents/
+.omo/
+.omc/
+.omx/
+.codegraph/
+.code-review-graph/
+.spec-workflow/
+.sixth/
+.playwright-mcp/
+.orca-transport-staging/
+.renovation-studio/
+.ruff_cache/
+.tmp_*
+_bmad/
+_bmad-output/
+{output_folder}/
+$e/
+D:dingsun*
+scripts/.gateway-token
+scripts/.collector-state.json
+.debug-journal*.md
+debug-journal*.md
+P1-*report*.md
+p1-*report*.md
+p1_*report*.md
+candidate-runtime-manifest*
+frontend-auth-login.png
+/eval/
+
+# Internal agent-policy docs (kept local, not part of the product)
+AGENTS.md
+CLAUDE.md
+_check_*.py
+_tmp_*.py
+backend/.p10*
+backend/_bp.json.txt
+backend/_p10*
+backend/docker-compose.p1-*
+backend/docker-compose.p10*
+apps/
+plugins/
+graphify-out/
+skill-work/
+demos/
+orca_skill_link

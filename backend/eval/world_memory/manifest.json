@@ -1,0 +1,11 @@
+{
+  "corpus_filename": "corpus.jsonl",
+  "corpus_hash": "6c2fcbd09a5303d55001780f1a82f55dfa348a5c34ba3c13340fa4999ee1f0b5",
+  "created_at": "2026-07-31T00:00:00+00:00",
+  "description": "P5-W sealed fixture for world-memory evaluation. Evidence-backed observations/facts, missing-evidence refusal, dual-timestamp freshness, and replay idempotency.",
+  "items_count": 6,
+  "items_filename": "items.jsonl",
+  "items_hash": "f5bfdf8a40bb5fb9e99dfcdfbd9ccceedee2ca326d147f648fb79cb5c7f530aa",
+  "name": "world_memory_eval",
+  "version": "1.0.0"
+}

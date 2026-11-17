@@ -1,0 +1,88 @@
+[package]
+name = "esragpro-mcp"
+version = "0.1.0"
+edition = "2021"
+description = "esRAGPro MCP Gateway - Thin protocol adapter calling domain APIs"
+license = "MIT"
+readme = "README.md"
+
+[[bin]]
+name = "esragpro-mcp"
+path = "src/main.rs"
+
+[dependencies]
+# ── MCP 协议 (rmcp SDK) ──
+# WP7: 添加 Streamable HTTP transport features
+rmcp = { version = "1", features = [
+    "server",
+    "transport-io",
+    "transport-streamable-http-server",
+    "transport-streamable-http-server-session",
+    "tower",
+    "schemars",
+] }
+
+# ── HTTP 服务 (WP7 Streamable HTTP) ──
+axum = "0.8"
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors", "limit"] }
+
+# ── 异步运行时 ──
+tokio = { version = "1", features = ["full"] }
+
+# ── 序列化 ──
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+schemars = { version = "1", features = ["uuid1", "chrono04"] }
+
+# ── HTTP 客户端 (调用领域 API) ──
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+
+# ── CLI ──
+clap = { version = "4", features = ["derive", "env"] }
+
+# ── 配置 ──
+toml = "0.8"
+
+# ── 错误处理 ──
+anyhow = "1"
+thiserror = "2"
+
+# ── 日志 ──
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# ── 工具 ──
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+url = "2"
+urlencoding = "2.1"
+async-trait = "0.1"
+
+# ── JWT/OAuth (WP7) ──
+jsonwebtoken = "9"
+sha2 = "0.10"
+hmac = "0.12"
+
+[dev-dependencies]
+# ── 测试 ──
+tokio-test = "0.4"
+wiremock = "0.6"
+
+[features]
+default = []
+# 未来可选：嵌入式后端 (Local Edge)
+embedded = []
+# Local Edge 完整功能
+local-edge = []
+# Streamable HTTP (WP7)
+http = []
+# WP7A: 管理工具 Profile (operator/admin)
+# stdio 默认不启用，只有 HTTP + OAuth 模式启用
+management-profile = []
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+strip = true
